@@ -1,68 +1,71 @@
-// src/components/GazeEventChecker.jsx
-
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 const gazeevents = [
-  { docX: -4, docY: 319, time: 1718751444024, state: 0, duration: 33 },
-  { docX: -6, docY: 227, time: 1718751449727, state: 0, duration: 123 },
-  { docX: -10, docY: 204, time: 1718751449837, state: 0, duration: 110 },
-  { docX: -201, docY: 207, time: 1718751450032, state: 0, duration: 123 },
+  { docX: 100, docY: 100, time: 1718751444024, state: 0, duration: 33 },
+  { docX: 120, docY: 120, time: 1718751449727, state: 0, duration: 123 },
+  { docX: 130, docY: 130, time: 1718751449837, state: 0, duration: 110 },
+  { docX: 140, docY: 140, time: 1718751450032, state: 0, duration: 123 },
+  { docX: 566, docY: 358, time: 1718751451000, state: 0, duration: 150 },
   // más puntos...
 ];
 
 const GazeEventChecker = () => {
   const buttonRef = useRef(null);
+  const [buttonRect, setButtonRect] = useState({});
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setButtonRect(rect);
+    }
+  }, []);
 
   useEffect(() => {
     const handleClick = (event) => {
-      const rect = event.target.getBoundingClientRect();
       const clickPosition = { x: event.clientX, y: event.clientY };
-      console.log("Click Position: ", clickPosition);
-      console.log("Element Position: ", rect);
+      const rect = buttonRef.current.getBoundingClientRect();
+      setButtonRect(rect);
 
-      // Comparar la posición del clic con gazeevents
-      const matchingEvents = gazeevents.filter((point) => {
-        const pointX = point.docX + window.scrollX; // Ajusta para la posición de desplazamiento
-        const pointY = point.docY + window.scrollY; // Ajusta para la posición de desplazamiento
+      // Registro de la posición exacta del clic
+      const clickMessage = `Clicked at: X=${clickPosition.x}, Y=${clickPosition.y}`;
 
+      // Filtra eventos de mirada que caigan dentro del área del botón
+      const matchingEvents = gazeevents.filter((gazeEvent) => {
         return (
-          pointX >= rect.left &&
-          pointX <= rect.right &&
-          pointY >= rect.top &&
-          pointY <= rect.bottom
+          gazeEvent.docX >= rect.left &&
+          gazeEvent.docX <= rect.right &&
+          gazeEvent.docY >= rect.top &&
+          gazeEvent.docY <= rect.bottom
         );
       });
 
-      console.log("Matching gaze events for this click: ", matchingEvents);
+      const eventsMessage = matchingEvents.length > 0
+        ? `Hay eventos de mirada dentro del área del botón: ${JSON.stringify(matchingEvents)}`
+        : 'No hay eventos de mirada dentro del área del botón.';
+
+      // Combinar mensajes
+      setMessage(`${clickMessage} | ${eventsMessage}`);
     };
 
     const button = buttonRef.current;
     if (button) {
       button.addEventListener('click', handleClick);
-      console.log('Button found and event listener added');
-    } else {
-      console.log('Button not found');
     }
 
     return () => {
       if (button) {
         button.removeEventListener('click', handleClick);
-        console.log('Event listener removed');
       }
     };
-  }, []);
+  }, [buttonRect]);
 
-  useEffect(() => {
-    const button = buttonRef.current; // Selecciona el botón para mostrar su posición inicial
-    if (button) {
-      const rect = button.getBoundingClientRect();
-      console.log(`Initial Button Position: `, rect);
-    } else {
-      console.log('Button not found during initial position check');
-    }
-  }, []);
-
-  return <button ref={buttonRef}>Botón de prueba</button>;
+  return (
+    <div>
+      <button ref={buttonRef}>Botón de prueba</button>
+      <div>{message}</div>
+    </div>
+  );
 };
 
 export default GazeEventChecker;
