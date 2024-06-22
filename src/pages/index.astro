@@ -1,4 +1,5 @@
 ---
+// Importar componentes de React
 import GazeEventChecker from '../components/GazeEventChecker.jsx';
 import MousePosition from '../components/MousePosition.jsx';
 ---
@@ -10,22 +11,31 @@ import MousePosition from '../components/MousePosition.jsx';
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Página de prueba</title>
   <style>
-    /* Centrar el botón */
+    /* Estilos para centrar elementos y estilizar botones y fotos */
     body {
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
     }
-    button {
+    button, img {
+      margin: 10px;
       padding: 10px 20px;
       font-size: 16px;
+      cursor: pointer;
+    }
+    img {
+      width: 150px;  /* Tamaño fijo para la demostración */
+      height: auto;
+      border: 2px solid black;
     }
   </style>
 </head>
 <body>
   <div id="root">
+    <!-- Cargar componentes de React en el cliente -->
     <GazeEventChecker client:load />
     <MousePosition client:load />
   </div>

@@ -3,16 +3,15 @@ import React, { useEffect, useRef, useState } from 'react';
 const gazeevents = [
   { docX: 100, docY: 100, time: 1718751444024, state: 0, duration: 33 },
   { docX: 120, docY: 120, time: 1718751449727, state: 0, duration: 123 },
-  { docX: 130, docY: 130, time: 1718751449837, state: 0, duration: 110 },
-  { docX: 140, docY: 140, time: 1718751450032, state: 0, duration: 123 },
   { docX: 696, docY: 335, time: 1718751451000, state: 0, duration: 150 },
   // más puntos...
 ];
 
 const GazeEventChecker = () => {
-  const buttonRef = useRef(null);
+  const button1Ref = useRef(null);
+  const button2Ref = useRef(null);
   const [clickPositions, setClickPositions] = useState([]);
-  const [matchingEventsArray, setMatchingEventsArray] = useState([]);  // Estado para almacenar eventos de mirada coincidentes
+  const [matchingEventsArray, setMatchingEventsArray] = useState([]);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -20,29 +19,22 @@ const GazeEventChecker = () => {
       const clickPosition = { x: event.clientX, y: event.clientY };
       setClickPositions(prevPositions => [...prevPositions, clickPosition]);
 
-      const rect = buttonRef.current?.getBoundingClientRect();
-
-      if (rect) {
-        const isClickInsideButton = clickPosition.x >= rect.left && clickPosition.x <= rect.right && clickPosition.y >= rect.top && clickPosition.y <= rect.bottom;
-        
-        if (isClickInsideButton) {
-          const matchingEvents = gazeevents.filter((gazeEvent) => {
+      // Verificar clics para cada botón
+      [button1Ref, button2Ref].forEach((ref, index) => {
+        const rect = ref.current?.getBoundingClientRect();
+        if (rect && clickPosition.x >= rect.left && clickPosition.x <= rect.right && clickPosition.y >= rect.top && clickPosition.y <= rect.bottom) {
+          const matchingEvents = gazeevents.filter(gazeEvent => {
             return gazeEvent.docX >= rect.left && gazeEvent.docX <= rect.right && gazeEvent.docY >= rect.top && gazeEvent.docY <= rect.bottom;
           });
 
           if (matchingEvents.length > 0) {
-            setMatchingEventsArray(prevEvents => [...prevEvents, ...matchingEvents]);  // Agrega eventos coincidentes al array
+            setMatchingEventsArray(matchingEvents); // Actualiza solo con los eventos coincidentes más recientes
+            setMessage(`Clicked at: X=${clickPosition.x}, Y=${clickPosition.y} | Hay eventos de mirada dentro del área del botón ${index + 1}: ${JSON.stringify(matchingEvents)}`);
+          } else {
+            setMessage(`Clicked at: X=${clickPosition.x}, Y=${clickPosition.y} | No hay eventos de mirada dentro del área del botón ${index + 1}.`);
           }
-
-          const eventsMessage = matchingEvents.length > 0
-            ? `Hay eventos de mirada dentro del área del botón: ${JSON.stringify(matchingEvents)}`
-            : 'No hay eventos de mirada dentro del área del botón.';
-
-          setMessage(`Clicked at: X=${clickPosition.x}, Y=${clickPosition.y} | ${eventsMessage}`);
-        } else {
-          setMessage(`Clicked at: X=${clickPosition.x}, Y=${clickPosition.y} | El clic fue fuera del botón.`);
         }
-      }
+      });
     };
 
     document.addEventListener('click', handleDocumentClick);
@@ -53,7 +45,8 @@ const GazeEventChecker = () => {
 
   return (
     <div>
-      <button ref={buttonRef}>Botón de prueba</button>
+      <button ref={button1Ref}>Botón 1</button>
+      <button ref={button2Ref}>Botón 2</button>
       <div>{message}</div>
       <div>Clics registrados:</div>
       {clickPositions.map((pos, index) => (
