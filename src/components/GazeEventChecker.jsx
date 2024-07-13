@@ -1,6 +1,6 @@
 // GazeEventChecker.jsx
 import React from 'react';
-import Movies, { data } from './DataFetcher.tsx';
+import  data  from './DataFetcher.jsx';
 import useGazeEvent from './useGazeEvent'; // Asumiendo que los datos se pasan como props o están en contexto/global state
 
 const gazeevents = [
